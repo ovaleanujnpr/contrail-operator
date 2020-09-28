@@ -178,6 +178,11 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 		rabbitmqSecretVhost = controlConfig.RabbitmqVhost
 	}
 
+	rabbitmqEndpointList := configtemplates.EndpointList(rabbitmqNodesInformation.ServerList, rabbitmqNodesInformation.SSLPort)
+	rabbitmqServerListSpaceSeparated := configtemplates.JoinListWithSeparator(rabbitmqEndpointList, " ")
+	cassandraCQLEndpointList := configtemplates.EndpointList(cassandraNodesInformation.ServerList, cassandraNodesInformation.CQLPort)
+	cassandraCQLServerListSpaceSeparated := configtemplates.JoinListWithSeparator(cassandraCQLEndpointList, " ")
+
 	sort.SliceStable(podList.Items, func(i, j int) bool { return podList.Items[i].Status.PodIP < podList.Items[j].Status.PodIP })
 	var data = make(map[string]string)
 	for idx := range podList.Items {
@@ -218,9 +223,9 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 			ASNNumber:           strconv.Itoa(*controlConfig.ASNNumber),
 			APIServerList:       configApiIPListSpaceSeparated,
 			APIServerPort:       strconv.Itoa(configNodesInformation.APIServerPort),
-			CassandraServerList: cassandraNodesInformation.ServerListCQLSpaceSeparated,
-			RabbitmqServerList:  rabbitmqNodesInformation.ServerListSpaceSeparatedSSL,
-			RabbitmqServerPort:  rabbitmqNodesInformation.SSLPort,
+			CassandraServerList: cassandraCQLServerListSpaceSeparated,
+			RabbitmqServerList:  rabbitmqServerListSpaceSeparated,
+			RabbitmqServerPort:  strconv.Itoa(rabbitmqNodesInformation.SSLPort),
 			CollectorServerList: configCollectorEndpointListSpaceSeparated,
 			RabbitmqUser:        rabbitmqSecretUser,
 			RabbitmqPassword:    rabbitmqSecretPassword,
@@ -253,9 +258,9 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 			Hostname:            hostname,
 			APIServerList:       configApiIPListSpaceSeparated,
 			APIServerPort:       strconv.Itoa(configNodesInformation.APIServerPort),
-			CassandraServerList: cassandraNodesInformation.ServerListCQLSpaceSeparated,
-			RabbitmqServerList:  rabbitmqNodesInformation.ServerListSpaceSeparatedSSL,
-			RabbitmqServerPort:  rabbitmqNodesInformation.SSLPort,
+			CassandraServerList: cassandraCQLServerListSpaceSeparated,
+			RabbitmqServerList:  rabbitmqServerListSpaceSeparated,
+			RabbitmqServerPort:  strconv.Itoa(rabbitmqNodesInformation.SSLPort),
 			CollectorServerList: configCollectorEndpointListSpaceSeparated,
 			RabbitmqUser:        rabbitmqSecretUser,
 			RabbitmqPassword:    rabbitmqSecretPassword,
@@ -274,8 +279,8 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 		}{
 			ListenAddress:       podList.Items[idx].Status.PodIP,
 			CollectorServerList: configCollectorEndpointListSpaceSeparated,
-			CassandraPort:       cassandraNodesInformation.CQLPort,
-			CassandraJmxPort:    cassandraNodesInformation.JMXPort,
+			CassandraPort:       strconv.Itoa(cassandraNodesInformation.CQLPort),
+			CassandraJmxPort:    strconv.Itoa(cassandraNodesInformation.JMXPort),
 			CAFilePath:          certificates.SignerCAFilepath,
 		})
 		data["nodemanager."+podList.Items[idx].Status.PodIP] = controlNodemanagerBuffer.String()
