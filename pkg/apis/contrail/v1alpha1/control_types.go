@@ -178,10 +178,10 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 		rabbitmqSecretVhost = controlConfig.RabbitmqVhost
 	}
 
-	rabbitmqEndpointList := configtemplates.EndpointList(rabbitmqNodesInformation.ServerList, rabbitmqNodesInformation.SSLPort)
-	rabbitmqServerListSpaceSeparated := configtemplates.JoinListWithSeparator(rabbitmqEndpointList, " ")
-	cassandraCQLEndpointList := configtemplates.EndpointList(cassandraNodesInformation.ServerList, cassandraNodesInformation.CQLPort)
-	cassandraCQLServerListSpaceSeparated := configtemplates.JoinListWithSeparator(cassandraCQLEndpointList, " ")
+	SSLEndpointList := configtemplates.EndpointList(rabbitmqNodesInformation.ServerIPList, rabbitmqNodesInformation.SSLPort)
+	rabbitmqSSLEndpointListSpaceSeparated := configtemplates.JoinListWithSeparator(SSLEndpointList, " ")
+	cassandraCQLEndpointList := configtemplates.EndpointList(cassandraNodesInformation.ServerIPList, cassandraNodesInformation.CQLPort)
+	cassandraCQLEndpointListSpaceSeparated := configtemplates.JoinListWithSeparator(cassandraCQLEndpointList, " ")
 
 	sort.SliceStable(podList.Items, func(i, j int) bool { return podList.Items[i].Status.PodIP < podList.Items[j].Status.PodIP })
 	var data = make(map[string]string)
@@ -223,8 +223,8 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 			ASNNumber:           strconv.Itoa(*controlConfig.ASNNumber),
 			APIServerList:       configApiIPListSpaceSeparated,
 			APIServerPort:       strconv.Itoa(configNodesInformation.APIServerPort),
-			CassandraServerList: cassandraCQLServerListSpaceSeparated,
-			RabbitmqServerList:  rabbitmqServerListSpaceSeparated,
+			CassandraServerList: cassandraCQLEndpointListSpaceSeparated,
+			RabbitmqServerList:  rabbitmqSSLEndpointListSpaceSeparated,
 			RabbitmqServerPort:  strconv.Itoa(rabbitmqNodesInformation.SSLPort),
 			CollectorServerList: configCollectorEndpointListSpaceSeparated,
 			RabbitmqUser:        rabbitmqSecretUser,
@@ -258,8 +258,8 @@ func (c *Control) InstanceConfiguration(request reconcile.Request,
 			Hostname:            hostname,
 			APIServerList:       configApiIPListSpaceSeparated,
 			APIServerPort:       strconv.Itoa(configNodesInformation.APIServerPort),
-			CassandraServerList: cassandraCQLServerListSpaceSeparated,
-			RabbitmqServerList:  rabbitmqServerListSpaceSeparated,
+			CassandraServerList: cassandraCQLEndpointListSpaceSeparated,
+			RabbitmqServerList:  rabbitmqSSLEndpointListSpaceSeparated,
 			RabbitmqServerPort:  strconv.Itoa(rabbitmqNodesInformation.SSLPort),
 			CollectorServerList: configCollectorEndpointListSpaceSeparated,
 			RabbitmqUser:        rabbitmqSecretUser,
